@@ -1,1 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stone No.5 — O Cebreiro</title>
 
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#0b1b2b;
+  color:white;
+}
+
+.container{
+  max-width:800px;
+  margin:auto;
+  padding:20px;
+}
+
+.card{
+  background:rgba(255,255,255,0.1);
+  padding:15px;
+  margin:10px 0;
+  border-radius:12px;
+}
+
+textarea,input{
+  width:100%;
+  padding:10px;
+  margin-top:10px;
+}
+
+button{
+  margin-top:10px;
+  padding:10px;
+  cursor:pointer;
+}
+
+img{
+  max-width:100%;
+  margin-top:10px;
+  border-radius:10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Stone No.5</h1>
+
+<div class="card">
+<textarea id="text"></textarea>
+<input type="file" id="photo">
+<button id="btn">Publish</button>
+</div>
+
+<div id="feed"></div>
+
+</div>
+
+<script>
+window.addEventListener("DOMContentLoaded", () => {
+
+let posts = JSON.parse(localStorage.getItem("posts") || "[]");
+
+document.getElementById("btn").addEventListener("click", async () => {
+
+const text = document.getElementById("text").value;
+const file = document.getElementById("photo").files[0];
+
+let photo = "";
+
+if(file){
+photo = await new Promise(r=>{
+const fr = new FileReader();
+fr.onload = ()=>r(fr.result);
+fr.readAsDataURL(file);
+});
+}
+
+posts.push({text,photo,date:Date.now()});
+localStorage.setItem("posts", JSON.stringify(posts));
+
+render();
+
+});
+
+function render(){
+const feed = document.getElementById("feed");
+feed.innerHTML="";
+
+posts.slice().reverse().forEach(p=>{
+const div = document.createElement("div");
+div.className="card";
+div.innerHTML = `
+<p>${p.text}</p>
+${p.photo?`<img src="${p.photo}">`:""}
+`;
+feed.appendChild(div);
+});
+}
+
+render();
+
+});
+</script>
+
+</body>
+</html>
