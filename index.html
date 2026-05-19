@@ -1,1 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stone No. 5 — O Cebreiro</title>
 
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg1:#0b1b2b;
+  --bg2:#1f3b4d;
+  --accent:#d97706;
+  --card:rgba(255,255,255,0.08);
+  --text:#eaf0f6;
+  --muted:#b8c2cc;
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:Inter, Arial, sans-serif;
+  background:linear-gradient(135deg,var(--bg1),var(--bg2));
+  color:var(--text);
+}
+
+/* TOPBAR */
+.topbar{
+  position:sticky;
+  top:0;
+  z-index:10;
+  backdrop-filter:blur(12px);
+  background:rgba(0,0,0,0.35);
+  padding:12px 18px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.brand{
+  font-weight:700;
+  letter-spacing:0.5px;
+}
+
+select{
+  padding:8px 10px;
+  border-radius:8px;
+  border:none;
+  background:rgba(255,255,255,0.1);
+  color:white;
+}
+
+/* HERO */
+.hero{
+  padding:60px 20px 30px;
+  text-align:center;
+}
+
+.hero h1{
+  font-size:40px;
+  margin:0;
+}
+
+.hero p{
+  color:var(--muted);
+  margin-top:10px;
+}
+
+/* CONTAINER */
+.container{
+  max-width:900px;
+  margin:auto;
+  padding:20px;
+}
+
+/* CARDS */
+.card{
+  background:var(--card);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:16px;
+  padding:20px;
+  margin:15px 0;
+  backdrop-filter:blur(10px);
+}
+
+h2{margin-top:0}
+
+/* INPUTS */
+textarea,input{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border-radius:10px;
+  border:none;
+  outline:none;
+}
+
+button{
+  margin-top:10px;
+  padding:12px 14px;
+  border:none;
+  border-radius:10px;
+  background:var(--accent);
+  color:white;
+  font-weight:600;
+  cursor:pointer;
+}
+
+button:hover{
+  opacity:0.9;
+}
+
+img{
+  max-width:100%;
+  margin-top:10px;
+  border-radius:12px;
+}
+
+small{color:var(--muted)}
+</style>
+</head>
+
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="brand">Stone No. 5 — O Cebreiro</div>
+  <select>
+    <option>English</option>
+    <option>Español</option>
+    <option>Italiano</option>
+  </select>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <h1>Historical Memory & Collective Journal</h1>
+  <p>A digital stone along the Camino de Santiago</p>
+</div>
+
+<!-- MAIN -->
+<div class="container">
+
+  <!-- HISTORY -->
+  <div class="card">
+    <h2>Historical Memory</h2>
+    <p>
+      O Cebreiro is a mountain gateway in Galicia on the Camino de Santiago. It has served for centuries as a refuge for pilgrims crossing the harsh pass between León and Galicia. Known for its ancient stone huts (pallozas), it preserves Celtic architectural heritage and medieval rural life. A legendary Eucharistic miracle in the 14th century transformed it into a sacred place of pilgrimage. Through fog, wind and altitude, it became a symbol of endurance and transition. Today it remains one of the most iconic and emotional stops on the Camino Frances. The landscape creates a sense of isolation and spirituality. Pilgrims arrive here exhausted but transformed. It represents the threshold between worlds, cultures and inner journeys. A place where history and faith merge into landscape.
+    </p>
+  </div>
+
+  <!-- POST -->
+  <div class="card">
+    <h2>Share a thought</h2>
+
+    <textarea id="text" placeholder="Write your reflection..."></textarea>
+    <input id="photo" type="file" accept="image/*" capture="environment" />
+
+    <button id="publishBtn">Publish</button>
+
+    <small>Photos are taken live from your camera</small>
+  </div>
+
+  <!-- FEED -->
+  <div class="card">
+    <h2>See others</h2>
+    <div id="feed"></div>
+  </div>
+
+</div>
+
+<script>
+window.addEventListener("DOMContentLoaded", () => {
+
+function getPosts(){
+  return JSON.parse(localStorage.getItem('ceb_posts') || '[]');
+}
+
+function savePosts(p){
+  localStorage.setItem('ceb_posts', JSON.stringify(p));
+}
+
+document.getElementById('publishBtn').addEventListener('click', post);
+
+function render(){
+  const feed = document.getElementById('feed');
+  feed.innerHTML = '';
+
+  getPosts().slice().reverse().forEach(p => {
+    const div = document.createElement('div');
+    div.className = 'card';
+    div.innerHTML = `
+      <p>${p.text}</p>
+      ${p.photo ? `<img src="${p.photo}">` : ''}
+      <small>${new Date(p.date).toLocaleString()}</small>
+    `;
+    feed.appendChild(div);
+  });
+}
+
+async function post(){
+  const text = document.getElementById('text').value;
+  const file = document.getElementById('photo').files[0];
+
+  let photoData = '';
+
+  if(file){
+    photoData = await new Promise((res, rej) => {
+      const r = new FileReader();
+      r.onload = () => res(r.result);
+      r.onerror = rej;
+      r.readAsDataURL(file);
+    });
+  }
+
+  const posts = getPosts();
+  posts.push({ text, photo: photoData, date: Date.now() });
+  savePosts(posts);
+
+  document.getElementById('text').value = '';
+  document.getElementById('photo').value = '';
+
+  render();
+}
+
+render();
+
+});
+</script>
+
+</body>
+</html>
